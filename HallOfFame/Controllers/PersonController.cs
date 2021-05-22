@@ -29,7 +29,7 @@ namespace HallOfFame.Controllers
             if(!persons.Any())
             {
                 //TODO: add logging
-                return NotFound("Not found Perons");
+                return NotFound("Not found Persons");
             }
             //TODO: add logging
             return Ok(persons);        
@@ -44,7 +44,7 @@ namespace HallOfFame.Controllers
             if (person == null)
             {
                 //TODO: add logging
-                return NotFound();
+                return NotFound($"Not found Person {id}");
             }
 
             //TODO: add logging
@@ -58,7 +58,7 @@ namespace HallOfFame.Controllers
             if (id != person.Id)
             {
                 //TODO: add logging
-                return BadRequest();
+                return BadRequest($"Not found Person {id}");
             }
 
             _context.Entry(person).State = EntityState.Modified;
@@ -67,12 +67,12 @@ namespace HallOfFame.Controllers
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException e)
+            catch (DbUpdateConcurrencyException)
             {
                 if (!PersonExists(id))
                 {
                     //TODO: add logging
-                    return NotFound(e.Message);
+                    return NotFound($"Not found Person {id}");
                 }
                 else
                 {
@@ -80,7 +80,7 @@ namespace HallOfFame.Controllers
                 }
             }
             //TODO: add logging
-            return Ok();
+            return Ok("Data base updated!");
         }
 
         // POST: api/v1/person
@@ -101,13 +101,13 @@ namespace HallOfFame.Controllers
             if (person == null)
             { 
                 //TODO: add logging
-                return NotFound();
+                return NotFound($"Not found Person {id}");
             }
 
             _context.Persons.Remove(person);
             await _context.SaveChangesAsync();
             //TODO: add logging
-            return Ok();
+            return Ok($"Person {id} has been deleted");
         }
 
         private bool PersonExists(long id)
