@@ -29,14 +29,12 @@ namespace HallOfFame
         {
             services.AddControllers();
 
-            //TODO: Перенести реализацию в json(metanit)
-            //string sqloptions = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=halloffamedb;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
             string connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<PersonContext>(options => options.UseSqlServer(connection));
 
             services.AddSwaggerGen(options =>
             {
-                options.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "HallOfFame", Version = "v1" });
             });
         }
 
