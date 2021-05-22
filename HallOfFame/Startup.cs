@@ -21,7 +21,7 @@ namespace HallOfFame
         {
             services.AddControllers();
 
-
+            //TODO: Перенести реализацию в json(metanit)
             string sqloptions = @"Data Source=(localdb)\MSSQLLocalDB;
                                     Initial Catalog=halloffamedb;
                                     Integrated Security=True;

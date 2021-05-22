@@ -24,7 +24,15 @@ namespace HallOfFame.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Person>>> GetPersons()
         {
-            return await _context.Persons.Include(p=>p.Skills).ToListAsync();
+            var persons = await _context.Persons.Include(p => p.Skills).ToListAsync();
+
+            if(persons.Any())
+            {
+                //TODO: add logging
+                return NotFound("Not found Perons");
+            }
+            //TODO: add logging
+            return Ok(persons);        
         }
 
         // GET: api/v1/person/5
@@ -34,18 +42,24 @@ namespace HallOfFame.Controllers
             var person = await _context.Persons.Include(p => p.Skills).FirstOrDefaultAsync(x => x.Id == id);
 
             if (person == null)
+            {
+                //TODO: add logging
                 return NotFound();
+            }
 
-            return person;
+            //TODO: add logging
+            return Ok(person);
         }
 
         // PUT: api/v1/person/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPerson(long id, Person person)
         {
             if (id != person.Id)
+            {
+                //TODO: add logging
                 return BadRequest();
+            }
 
             _context.Entry(person).State = EntityState.Modified;
 
@@ -53,23 +67,23 @@ namespace HallOfFame.Controllers
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException e)
             {
                 if (!PersonExists(id))
                 {
-                    return NotFound();
+                    //TODO: add logging
+                    return NotFound(e.Message);
                 }
                 else
                 {
                     throw;
                 }
             }
-
-            return NoContent();
+            //TODO: add logging
+            return Ok();
         }
 
         // POST: api/v1/person
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Person>> PostPerson(Person person)
         {
@@ -85,13 +99,15 @@ namespace HallOfFame.Controllers
         {
             var person = await _context.Persons.Include(p => p.Skills).FirstOrDefaultAsync(x => x.Id == id);
             if (person == null)
+            { 
+                //TODO: add logging
                 return NotFound();
-
+            }
 
             _context.Persons.Remove(person);
             await _context.SaveChangesAsync();
-
-            return NoContent();
+            //TODO: add logging
+            return Ok();
         }
 
         private bool PersonExists(long id)
