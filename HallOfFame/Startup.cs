@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
@@ -15,6 +16,13 @@ namespace HallOfFame
 {
     public class Startup
     {
+
+        public Startup(IConfiguration _configuration)
+        {
+            Configuration = _configuration;
+        }
+
+        public IConfiguration Configuration { get; }
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
@@ -22,14 +30,9 @@ namespace HallOfFame
             services.AddControllers();
 
             //TODO: Перенести реализацию в json(metanit)
-            string sqloptions = @"Data Source=(localdb)\MSSQLLocalDB;
-                                    Initial Catalog=halloffamedb;
-                                    Integrated Security=True;
-                                    Connect Timeout=30;Encrypt=False;
-                                    TrustServerCertificate=False;
-                                    ApplicationIntent=ReadWrite;
-                                    MultiSubnetFailover=False";
-            services.AddDbContext<PersonContext>(options => options.UseSqlServer(sqloptions));
+            //string sqloptions = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=halloffamedb;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+            string connection = Configuration.GetConnectionString("DefaultConnection");
+            services.AddDbContext<PersonContext>(options => options.UseSqlServer(connection));
 
             services.AddSwaggerGen(options =>
             {

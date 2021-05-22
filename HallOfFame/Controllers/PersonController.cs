@@ -26,7 +26,7 @@ namespace HallOfFame.Controllers
         {
             var persons = await _context.Persons.Include(p => p.Skills).ToListAsync();
 
-            if(persons.Any())
+            if(!persons.Any())
             {
                 //TODO: add logging
                 return NotFound("Not found Perons");
