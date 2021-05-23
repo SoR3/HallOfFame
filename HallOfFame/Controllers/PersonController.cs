@@ -1,4 +1,5 @@
-﻿using HallOfFame.Models;
+﻿using HallOfFame.Core.Models;
+using HallOfFame.Infastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
