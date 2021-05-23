@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace HallOfFame.Models
+namespace HallOfFame.Core.Models
 {
     public class Skill
     {

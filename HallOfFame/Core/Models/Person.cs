@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace HallOfFame.Models
+namespace HallOfFame.Core.Models
 {
     public class Person
     {

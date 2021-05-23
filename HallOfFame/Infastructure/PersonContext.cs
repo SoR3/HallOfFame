@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using HallOfFame.Core.Models;
 
-namespace HallOfFame.Models
+namespace HallOfFame.Infastructure
 {
     public class PersonContext : DbContext
     {
