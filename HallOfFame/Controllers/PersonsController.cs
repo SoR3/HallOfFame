@@ -34,6 +34,7 @@ namespace HallOfFame.Controllers
             _context = context;
             _logger = logger;
         }
+
         /// <summary>
         /// Показать список сотрудников
         /// </summary>
@@ -66,7 +67,7 @@ namespace HallOfFame.Controllers
         /// <summary>
         /// Показать сотрудника по идентификатору
         /// </summary>
-        /// <param name="id">идентификатор</param>
+        /// <param name="id">идентификатор сотрудника</param>
         /// <returns></returns>
         [HttpGet("person/{id}")]
         public async Task<ActionResult<Person>> GetPerson(long id)
@@ -91,10 +92,11 @@ namespace HallOfFame.Controllers
             }
            
         }
+
         /// <summary>
         /// Изменить данные о сотруднике по идентификатору
         /// </summary>
-        /// <param name="id">идентификатор</param>
+        /// <param name="id">идентификатор сотрудника</param>
         /// <param name="person">сотрудник</param>
         /// <returns></returns>
         [HttpPut("person/{id}")]
@@ -109,32 +111,16 @@ namespace HallOfFame.Controllers
                     _logger.LogError($"BadRequest: person {id} not found");
                     return BadRequest("BadRequest");
                 }
-                _context.Entry(person).State = EntityState.Modified;
-                person.Skills?.ForEach(skill =>
-                {
-                    skill.SkillId = id;
-                    _context.Entry(skill).State = EntityState.Modified;
-                });
 
-                //person.Name = person.Name;
-                //person.DisplayName = person.DisplayName;
-                //person.Skills.AddRange(person.Skills);
-
-                //_context.Persons.Update(person);
+                person.Name = person.Name;
+                person.DisplayName = person.DisplayName;
+                person.Skills.AddRange(person.Skills);
+                _context.Skills.UpdateRange();
+                _context.Persons.Update(person);
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException e)
+            catch (DbUpdateConcurrencyException)
             {
-                foreach (var entry in e.Entries)
-                {
-                    if (entry.Entity is Person || entry.Entity is Skill)
-                    {
-                        if (entry.GetDatabaseValues() == null)
-                        {
-                            return NotFound();
-                        }
-                    }
-                }
                 if (!PersonExists(id))
                 {
                     _logger.LogError($"Not found Person {id}");
@@ -148,6 +134,7 @@ namespace HallOfFame.Controllers
 
             return Ok("Data base updated!");
         }
+
         /// <summary>
         /// Добавить нового сотрудника
         /// </summary>
@@ -167,7 +154,7 @@ namespace HallOfFame.Controllers
         /// <summary>
         /// Удаление сотрудника по идентификатору
         /// </summary>
-        /// <param name="id">идентификатор</param>
+        /// <param name="id">идентификатор сотрудника</param>
         /// <returns></returns>
         [HttpDelete("person/{id}")]
         public async Task<IActionResult> DeletePerson(long id)
@@ -198,6 +185,7 @@ namespace HallOfFame.Controllers
             }
             
         }
+
         /// <summary>
         /// Проверка на существование сотрдуника в БД
         /// </summary>

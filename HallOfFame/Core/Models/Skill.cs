@@ -9,6 +9,7 @@ namespace HallOfFame.Core.Models
         /// <summary>
         /// Идентификатор навыка
         /// </summary>
+        [JsonIgnore]
         public long SkillId { get; set; } 
         /// <summary>
         /// Название навыка

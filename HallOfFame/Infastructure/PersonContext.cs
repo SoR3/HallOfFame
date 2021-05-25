@@ -26,7 +26,10 @@ namespace HallOfFame.Infastructure
         /// <param name="modelBuilder">Построитель, который определяет модель для создаваемого контекста.</param>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Person>().HasMany(x => x.Skills).WithOne(x => x.Person).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Person>()
+                .HasMany(x => x.Skills)
+                .WithOne(x => x.Person)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
     }
