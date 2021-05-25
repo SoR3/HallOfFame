@@ -10,21 +10,35 @@ using System.Threading.Tasks;
 
 namespace HallOfFame.Controllers
 {
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/")]
     [ApiController]
-    public class PersonController : ControllerBase
+    public class PersonsController : ControllerBase
     {
+        /// <summary>
+        /// База данных.
+        /// </summary>
         private readonly PersonContext _context;
-        private readonly ILogger<PersonController> _logger;
 
-        public PersonController(PersonContext context, ILogger<PersonController> logger)
+        /// <summary>
+        /// Логгер
+        /// </summary>
+        private readonly ILogger<PersonsController> _logger;
+
+        /// <summary>
+        /// Конструктор контроллера для работы с сотрудниками
+        /// </summary>
+        /// <param name="context">База данныз</param>
+        /// <param name="logger">Логгер</param>
+        public PersonsController(PersonContext context, ILogger<PersonsController> logger)
         {
             _context = context;
             _logger = logger;
         }
-
-        // GET: api/v1/person
-        [HttpGet]
+        /// <summary>
+        /// Показать список сотрудников
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("persons")]
         public async Task<ActionResult<IEnumerable<Person>>> GetPersons()
         {
             _logger.LogInformation($"api/v1/persons GET request at {DateTime.Now:hh:mm:ss}");
@@ -49,8 +63,12 @@ namespace HallOfFame.Controllers
             
         }
 
-        // GET: api/v1/person/5
-        [HttpGet("{id}")]
+        /// <summary>
+        /// Показать сотрудника по идентификатору
+        /// </summary>
+        /// <param name="id">идентификатор</param>
+        /// <returns></returns>
+        [HttpGet("person/{id}")]
         public async Task<ActionResult<Person>> GetPerson(long id)
         {
             _logger.LogInformation($"api/v1/person GET request at {DateTime.Now:hh:mm:ss}");
@@ -73,27 +91,50 @@ namespace HallOfFame.Controllers
             }
            
         }
-
-        // PUT: api/v1/person/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutPerson(long id, Person person)
+        /// <summary>
+        /// Изменить данные о сотруднике по идентификатору
+        /// </summary>
+        /// <param name="id">идентификатор</param>
+        /// <param name="person">сотрудник</param>
+        /// <returns></returns>
+        [HttpPut("person/{id}")]
+        public async Task<IActionResult> PutPerson(long id,[FromBody] Person person)
         {
             _logger.LogInformation($"api/v1/person PUT request at {DateTime.Now:hh:mm:ss}");
 
-            if (id != person.Id)
-            {
-                _logger.LogError($"BadRequest: person {id} not found");
-                return BadRequest("BadRequest");
-            }
-
-            _context.Entry(person).State = EntityState.Modified;
-
             try
             {
+                if (id != person.Id)
+                {
+                    _logger.LogError($"BadRequest: person {id} not found");
+                    return BadRequest("BadRequest");
+                }
+                _context.Entry(person).State = EntityState.Modified;
+                person.Skills?.ForEach(skill =>
+                {
+                    skill.SkillId = id;
+                    _context.Entry(skill).State = EntityState.Modified;
+                });
+
+                //person.Name = person.Name;
+                //person.DisplayName = person.DisplayName;
+                //person.Skills.AddRange(person.Skills);
+
+                //_context.Persons.Update(person);
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException e)
             {
+                foreach (var entry in e.Entries)
+                {
+                    if (entry.Entity is Person || entry.Entity is Skill)
+                    {
+                        if (entry.GetDatabaseValues() == null)
+                        {
+                            return NotFound();
+                        }
+                    }
+                }
                 if (!PersonExists(id))
                 {
                     _logger.LogError($"Not found Person {id}");
@@ -107,9 +148,12 @@ namespace HallOfFame.Controllers
 
             return Ok("Data base updated!");
         }
-
-        // POST: api/v1/person
-        [HttpPost]
+        /// <summary>
+        /// Добавить нового сотрудника
+        /// </summary>
+        /// <param name="person">сотрудник</param>
+        /// <returns></returns>
+        [HttpPost("person")]
         public async Task<ActionResult<Person>> PostPerson(Person person)
         {
             _logger.LogInformation($"api/v1/person POST request at {DateTime.Now:hh:mm:ss}");
@@ -120,8 +164,12 @@ namespace HallOfFame.Controllers
             return CreatedAtAction("GetPerson", new { id = person.Id }, person);
         }
 
-        // DELETE: api/v1/person/5
-        [HttpDelete("{id}")]
+        /// <summary>
+        /// Удаление сотрудника по идентификатору
+        /// </summary>
+        /// <param name="id">идентификатор</param>
+        /// <returns></returns>
+        [HttpDelete("person/{id}")]
         public async Task<IActionResult> DeletePerson(long id)
         {
             _logger.LogInformation($"api/v1/person DELET request at {DateTime.Now:hh:mm:ss}");
@@ -129,13 +177,16 @@ namespace HallOfFame.Controllers
             try
             {
                 var person = await _context.Persons.Include(p => p.Skills).FirstOrDefaultAsync(x => x.Id == id);
+
                 if (person == null)
                 {
                     _logger.LogError($"Not found person {id}");
                     return NotFound($"Not found Person {id}");
                 }
 
+                _context.RemoveRange(person.Skills);
                 _context.Persons.Remove(person);
+
                 await _context.SaveChangesAsync();
 
                 return Ok($"Person {id} has been deleted");
@@ -147,7 +198,11 @@ namespace HallOfFame.Controllers
             }
             
         }
-
+        /// <summary>
+        /// Проверка на существование сотрдуника в БД
+        /// </summary>
+        /// <param name="id">идентификатор сотрудника</param>
+        /// <returns></returns>
         private bool PersonExists(long id)
         {
             return _context.Persons.Include(p => p.Skills).Any(e => e.Id == id);

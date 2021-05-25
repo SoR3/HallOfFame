@@ -1,4 +1,4 @@
-using HallOfFame.Models;
+using HallOfFame.Core.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
