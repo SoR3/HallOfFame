@@ -13,7 +13,7 @@ namespace HallOfFame.Core.Models
         /// Идентификатор пользователя
         /// </summary>
         [Key]
-        public long Id { get; set; }
+        public long? Id { get; set; }
 
         /// <summary>
         /// Имя пользователя

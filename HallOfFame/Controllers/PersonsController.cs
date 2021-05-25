@@ -48,13 +48,12 @@ namespace HallOfFame.Controllers
             {
                 var persons = await _context.Persons.Include(p => p.Skills).ToListAsync();
 
-                if (!persons.Any())
-                {
-                    _logger.LogError("Not found persons");
-                    return NotFound("Not found Persons");
-                }
+                if (persons.Any())
+                    return Ok(persons);
 
-                return Ok(persons);
+                _logger.LogError("Not found persons");
+
+                return NotFound("Not found Persons");
             }
             catch(Exception e)
             {
@@ -77,13 +76,12 @@ namespace HallOfFame.Controllers
             {
                 var person = await _context.Persons.Include(p => p.Skills).FirstOrDefaultAsync(x => x.Id == id);
 
-                if (person == null)
-                {
-                    _logger.LogError($"Not found person {id}");
-                    return NotFound($"Not found Person {id}");
-                }
+                if (person != null)
+                    return Ok(person);
 
-                return Ok(person);
+                _logger.LogError($"Not found person {id}");
+
+                return NotFound($"Not found Person {id}");
             }
             catch (Exception e)
             {
@@ -100,22 +98,30 @@ namespace HallOfFame.Controllers
         /// <param name="person">сотрудник</param>
         /// <returns></returns>
         [HttpPut("person/{id}")]
-        public async Task<IActionResult> PutPerson(long id,[FromBody] Person person)
+        public async Task<IActionResult> PutPerson(long id,[FromBody] Person newPerson)
         {
             _logger.LogInformation($"api/v1/person PUT request at {DateTime.Now:hh:mm:ss}");
 
             try
             {
+                var person =  _context.Persons.Include(p => p.Skills).SingleOrDefault(x => x.Id == id);
                 if (id != person.Id)
                 {
                     _logger.LogError($"BadRequest: person {id} not found");
                     return BadRequest("BadRequest");
                 }
 
-                person.Name = person.Name;
-                person.DisplayName = person.DisplayName;
-                person.Skills.AddRange(person.Skills);
-                _context.Skills.UpdateRange();
+                person.Name = newPerson.Name;
+                person.DisplayName = newPerson.DisplayName;
+
+                if (newPerson.Skills.Where(s => s.SkillId == 0).Any())
+                    person.Skills.AddRange(newPerson.Skills);
+                if (newPerson.Skills.Where(s => s.SkillId != 0).Any())
+                {
+                    person.Skills = newPerson.Skills;
+                    _context.Skills.UpdateRange();
+                }
+
                 _context.Persons.Update(person);
                 await _context.SaveChangesAsync();
             }
